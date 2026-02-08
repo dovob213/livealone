@@ -4,6 +4,7 @@ import com.springboot.livealone.dto.request.UserJoinDto;
 import com.springboot.livealone.entity.User;
 import com.springboot.livealone.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,19 +15,24 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    private final BCryptPasswordEncoder passwordEncoder; // 비밀번호 그대로저장 안하고 암호화하기. 기계 가져오기.
+
     public Long join(UserJoinDto dto) {
-        // 1. DTO -> Entity 변환 (요리하기)
-        User user = User.builder()  // dto 내용을 User(엔티티 쓴거)
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new RuntimeException("이미 존재하는 이메일입니다.");
+        }
+
+        // ★ 비밀번호 암호화 실행
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+
+        User user = User.builder()
                 .email(dto.getEmail())
-                .password(dto.getPassword()) // 원래 여기서 암호화 로직
+                .password(encodedPassword) // 암호화된 비번 저장!
                 .nickname(dto.getNickname())
                 .university(dto.getUniversity())
                 .role("USER")
                 .build();
 
-        // 2. Repository를 통해 DB 저장 (창고에 넣기)
-        User savedUser = userRepository.save(user);
-
-        return savedUser.getId();
+        return userRepository.save(user).getId();
     }
 }
