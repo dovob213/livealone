@@ -1,0 +1,9 @@
+# Root .gitignore
+**/node_modules/
+**/build/
+**/.gradle/
+**/.DS_Store
+**/out/
+target/
+.idea/
+*.class
