@@ -41,4 +41,32 @@ public class PostService {
                 .map(PostResponseDto::new)       // DTO로 변환
                 .collect(Collectors.toList());   // 리스트로 반환
     }
+
+    // 게시글 조회 (상세보기)
+    @Transactional(readOnly = true)
+    public PostResponseDto getPost(Long id) {
+        // DB에서 id 조회
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
+
+        // 찾은 엔티티(Post)를 DTO로 반환
+        return new PostResponseDto(post);
+    }
+
+
+    // 게시글 삭제
+    @Transactional
+    public void delete(Long id, String email) {
+        // 게시글 있는지 확인
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
+
+        // 작성자 본인인지 확인
+        if (!post.getUser().getEmail().equals(email)) { // post.getUser().getEmail(): 글쓴이 이메일 vs email: 지금 로그인해서 삭제 버튼 누른 사람 이메일
+            throw new IllegalArgumentException("작성자만 삭제할 수 있습니다!");
+        }
+
+        // 3. 검증 통과했으면 삭제!
+        postRepository.delete(post);
+    }
 }

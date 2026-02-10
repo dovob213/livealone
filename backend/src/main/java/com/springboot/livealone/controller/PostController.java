@@ -34,4 +34,18 @@ public class PostController {
     public ResponseEntity<List<PostResponseDto>> getList() {
         return ResponseEntity.ok(postService.getList());
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PostResponseDto> getPost(@PathVariable Long id) {
+        return ResponseEntity.ok(postService.getPost(id));
+    }
+    @DeleteMapping("/{id}") // 삭제 api
+    public ResponseEntity<String> delete(@PathVariable Long id, Authentication authentication) {
+        String email = authentication.getName(); // 로그인한 사람 이메일
+
+        postService.delete(id, email); // 서비스에 삭제 요청
+
+        return ResponseEntity.ok(id + "번 게시글 삭제 완료!");
+    }
+
 }
