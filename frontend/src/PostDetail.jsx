@@ -5,33 +5,60 @@ import axios from "axios";
 function PostDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
+
+    // 상태 변수들
     const [post, setPost] = useState(null);
     const [comments, setComments] = useState([]);
+    const [commentContent, setCommentContent] = useState("");
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        console.log("1. useEffect 시작! ID:", id);
 
+        // 게시글
         axios.get(`http://localhost:8080/api/posts/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => setPost(res.data))
-            .catch(() => navigate("/"));
+            .catch(() => {
+                alert("글을 불러오지 못했습니다.");
+                navigate("/");
+            });
 
-        console.log("2. 댓글 요청 보냄!");
+        // 댓글
+        fetchComments();
+    }, [id]);
 
+    const fetchComments = () => {
+        const token = localStorage.getItem("token");
         axios.get(`http://localhost:8080/api/comments/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
-            .then(res => {
-                console.log("3. 성공! 데이터 받음:", res.data);
-                setComments(res.data);
-            })
-            .catch(err => {
-                console.error("3. 실패! 에러 발생:", err);
-            });
+            .then(res => setComments(res.data))
+            .catch(err => console.log(err));
+    }
 
-    }, [id]);
+    const submitComment = async () => {
+        if (!commentContent) {
+            alert("댓글 내용을 입력해주세요!");
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem("token");
+            await axios.post(`http://localhost:8080/api/comments/${id}`,
+                { content: commentContent }, // 백엔드 DTO랑 이름(content) 맞춰야 함
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            alert("댓글 등록 완료!");
+            setCommentContent("");
+            fetchComments();
+
+        } catch (error) {
+            console.error(error);
+            alert("댓글 작성 실패.. (로그인 했나요?)");
+        }
+    };
 
     const handleDelete = async () => {
         if (!window.confirm("정말 삭제하시겠습니까?")) return;
@@ -52,7 +79,7 @@ function PostDetail() {
         <div style={{ padding: "50px", maxWidth: "600px", margin: "0 auto" }}>
             <button onClick={() => navigate("/")} style={{ marginBottom: "20px" }}>⬅ 목록으로</button>
 
-            {/* 게시글 영역 */}
+            {}
             <div style={{ border: "1px solid #ddd", padding: "20px", borderRadius: "10px" }}>
                 <h1>{post.title}</h1>
                 <div style={{ color: "#888", marginBottom: "20px", fontSize: "14px" }}>
@@ -69,11 +96,30 @@ function PostDetail() {
                 </div>
             </div>
 
-            {/* ★ 댓글 영역 (새로 추가) */}
-            <div style={{ marginTop: "30px" }}>
-                <h3>💬 댓글 ({comments.length}개)</h3>
+            {}
+            <div style={{ marginTop: "30px", marginBottom: "30px" }}>
+                <div style={{ display: "flex", gap: "10px" }}>
+                    <input
+                        type="text"
+                        placeholder="댓글을 남겨보세요..."
+                        value={commentContent}
+                        onChange={(e) => setCommentContent(e.target.value)}
+                        style={{ flex: 1, padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
+                    />
+                    <button
+                        onClick={submitComment}
+                        style={{ padding: "10px 20px", background: "#007BFF", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}
+                    >
+                        등록
+                    </button>
+                </div>
+            </div>
 
-                {comments.length === 0 ? (
+            {}
+            <div style={{ marginTop: "30px" }}>
+                <h3>💬 댓글 ({comments ? comments.length : 0}개)</h3>
+
+                {(!comments || comments.length === 0) ? (
                     <p style={{ color: "gray" }}>아직 댓글이 없습니다.</p>
                 ) : (
                     comments.map((comment) => (
