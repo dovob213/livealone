@@ -18,7 +18,7 @@ function Signup() {
 
         try {
             // 백엔드의 회원가입 API로 데이터 전송!
-            await axios.post("http://localhost:8080/api/users/join", {
+            await axios.post("http://3.27.105.201:8080/api/users/join", {
                 email: email,
                 password: password,
                 nickname: nickname

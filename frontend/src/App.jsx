@@ -18,7 +18,7 @@ function Home() {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post("http://localhost:8080/api/users/login", { email, password });
+            const res = await axios.post("http://3.27.105.201:8080/api/users/login", { email, password });
             localStorage.setItem("token", res.data);
             setToken(res.data);
         } catch (err) { alert("로그인 실패"); }
@@ -26,7 +26,7 @@ function Home() {
 
     useEffect(() => {
         if (token) {
-            axios.get("http://localhost:8080/api/posts", {
+            axios.get("http://3.27.105.201:8080/api/posts", {
                 headers: { Authorization: `Bearer ${token}` }
             }).then(res => setPosts(res.data)).catch(() => setToken(null));
         }
@@ -34,7 +34,7 @@ function Home() {
 
     return (
         <div style={{ padding: "20px" }}>
-            <h1 style={{ textAlign: "center" }}>🏠 자취생 커뮤니티</h1>
+            <h1 style={{ textAlign: "center" }}> SDDG </h1>
 
             {!token ? (
                 <div style={{ textAlign: "center" }}>
@@ -53,12 +53,12 @@ function Home() {
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom:"20px" }}>
                         {/* 글쓰기 버튼 */}
                         <Link to="/write">
-                            <button style={{ padding: "10px", background: "green", color: "white" }}>✏️ 새 글 쓰기</button>
+                            <button style={{ padding: "10px", background: "green", color: "white" }}>새 글 쓰기</button>
                         </Link>
                         <button onClick={() => { localStorage.removeItem("token"); setToken(null); }}>로그아웃</button>
                     </div>
 
-                    <h2>📋 글 목록</h2>
+                    <h2>글 목록</h2>
                     {posts.map(post => (
                         <div key={post.id} style={{ border: "1px solid #ddd", margin: "10px 0", padding: "15px" }}>
                             <Link to={`/posts/${post.id}`}>
