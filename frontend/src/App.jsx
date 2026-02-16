@@ -5,6 +5,8 @@ import { Routes, Route, useNavigate, Link } from 'react-router-dom'
 
 import PostDetail from './PostDetail'  // 상세 페이지 (댓글 기능 있는 파일)
 import PostCreate from './PostCreate'  // 글쓰기 페이지
+import Signup from './Signup';
+import PostEdit from './PostEdit';
 
 
 function Home() {
@@ -35,11 +37,17 @@ function Home() {
             <h1 style={{ textAlign: "center" }}>🏠 자취생 커뮤니티</h1>
 
             {!token ? (
-                <form onSubmit={handleLogin} style={{display:"flex", gap:"5px", justifyContent:"center"}}>
-                    <input placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} />
-                    <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} />
-                    <button type="submit">로그인</button>
-                </form>
+                <div style={{ textAlign: "center" }}>
+                    <form onSubmit={handleLogin} style={{display:"flex", gap:"5px", justifyContent:"center", marginBottom: "10px"}}>
+                        <input placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} />
+                        <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} />
+                        <button type="submit">로그인</button>
+                    </form>
+                    {}
+                    <Link to="/signup" style={{ color: "#007BFF", textDecoration: "underline", fontSize: "14px" }}>
+                        아직 계정이 없으신가요? 회원가입하기
+                    </Link>
+                </div>
             ) : (
                 <div>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom:"20px" }}>
@@ -70,10 +78,12 @@ function App() {
         <Routes>
             <Route path="/" element={<Home />} />
 
-            {}
             <Route path="/posts/:id" element={<PostDetail />} />
 
             <Route path="/write" element={<PostCreate />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/edit/:id" element={<PostEdit />} />
+
         </Routes>
     )
 }

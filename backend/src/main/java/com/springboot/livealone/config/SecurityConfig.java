@@ -40,9 +40,10 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(new AntPathRequestMatcher("/api/users/join")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/users/login")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/posts", "GET")).permitAll() // 게시글 조회는 로그인 안 해도 되게
+                        .requestMatchers("/api/users/join", "/api/users/login", "/api/users/signup").permitAll()
+                        // 2. 게시글 목록/상세 조회(GET) 누구나 보게
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/posts/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);

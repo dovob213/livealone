@@ -69,4 +69,19 @@ public class PostService {
         // 3. 검증 통과했으면 삭제!
         postRepository.delete(post);
     }
+
+    @Transactional
+    public void updatePost(Long id, com.springboot.livealone.dto.request.PostCreateDto dto, String email) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+
+        if (!post.getUser().getEmail().equals(email)) {
+            throw new IllegalArgumentException("본인 글만 수정할 수 있습니다."); // 여기서 걸리면 프론트로 에러가 감!
+        }
+
+        // 내용 변경. (JPA의 '더티 체킹' 덕분에 save()를 안 해도 알아서 DB가 바뀐다고 한다)
+        post.setTitle(dto.getTitle());
+        post.setContent(dto.getContent());
+    }
+
 }

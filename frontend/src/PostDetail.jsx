@@ -89,8 +89,19 @@ function PostDetail() {
                 <p style={{ minHeight: "150px", fontSize: "18px", lineHeight: "1.6" }}>
                     {post.content}
                 </p>
-                <div style={{ textAlign: "right" }}>
-                    <button onClick={handleDelete} style={{ backgroundColor: "#dc3545", color: "white", border: "none", padding: "10px 20px", borderRadius: "5px", cursor: "pointer" }}>
+                <div style={{ textAlign: "right", marginTop: "10px" }}>
+                    {/* ★★★ 새로 추가된 수정 버튼 ★★★ */}
+                    <button
+                        onClick={() => navigate(`/edit/${id}`)}
+                        style={{ backgroundColor: "#ffc107", color: "black", border: "none", padding: "10px 20px", borderRadius: "5px", cursor: "pointer", marginRight: "10px" }}
+                    >
+                        수정하기 ✏️
+                    </button>
+
+                    <button
+                        onClick={handleDelete}
+                        style={{ backgroundColor: "#dc3545", color: "white", border: "none", padding: "10px 20px", borderRadius: "5px", cursor: "pointer" }}
+                    >
                         삭제하기 🗑️
                     </button>
                 </div>

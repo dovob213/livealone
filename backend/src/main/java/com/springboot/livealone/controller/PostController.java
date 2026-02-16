@@ -48,4 +48,18 @@ public class PostController {
         return ResponseEntity.ok(id + "번 게시글 삭제 완료!");
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updatePost(
+            @PathVariable Long id,
+            @RequestBody com.springboot.livealone.dto.request.PostCreateDto dto,
+            Authentication authentication
+    ) {
+        String email = authentication.getName();
+
+        // 서비스에게 "이(id) 글을, 이 내용(dto)으로, 이 사람(email)이 수정한다" 고 전달
+        postService.updatePost(id, dto, email);
+
+        return ResponseEntity.ok("수정 완료!");
+    }
+
 }
