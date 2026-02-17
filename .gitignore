@@ -7,4 +7,5 @@
 target/
 .idea/
 *.class
+*.pemmongo_data/
 *.pem
