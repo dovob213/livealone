@@ -9,3 +9,4 @@ target/
 *.class
 *.pemmongo_data/
 *.pem
+postgres_data/
