@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: 코드 가져오기 (Checkout)
         uses: actions/checkout@v3
@@ -17,6 +19,7 @@ jobs:
           node-version: '24'
 
       - name: 패키지 설치 및 리액트 빌드
+        working-directory: ./frontend
         run: |
           npm install
           npm run build
@@ -27,7 +30,7 @@ jobs:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_KEY }}
-          source: "dist/*"
+          source: "frontend/dist/*"
           target: "/home/ubuntu/frontend-dist"
 
       - name: Nginx 서빙 테이블 세팅 및 재시작 (SSH)
@@ -37,5 +40,5 @@ jobs:
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_KEY }}
           script: |
-            sudo cp -r /home/ubuntu/frontend-dist/dist/* /var/www/html/
+            sudo cp -r /home/ubuntu/frontend-dist/frontend/dist/* /var/www/html/
             sudo systemctl restart nginx
