@@ -1,0 +1,41 @@
+name: React Frontend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 코드 가져오기 (Checkout)
+        uses: actions/checkout@v3
+
+      - name: Node.js 설치
+        uses: actions/setup-node@v3
+        with:
+          node-version: '24'
+
+      - name: 패키지 설치 및 리액트 빌드
+        run: |
+          npm install
+          npm run build
+
+      - name: AWS로 dist 폴더 전송 (SCP)
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_KEY }}
+          source: "dist/*"
+          target: "/home/ubuntu/frontend-dist"
+
+      - name: Nginx 서빙 테이블 세팅 및 재시작 (SSH)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_KEY }}
+          script: |
+            sudo cp -r /home/ubuntu/frontend-dist/dist/* /var/www/html/
+            sudo systemctl restart nginx
