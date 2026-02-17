@@ -18,7 +18,7 @@ function Signup() {
 
         try {
             // 백엔드의 회원가입 API로 데이터 전송!
-            await axios.post("http://3.27.105.201:8080/api/users/join", {
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/users/join`, {
                 email: email,
                 password: password,
                 nickname: nickname
@@ -35,7 +35,7 @@ function Signup() {
 
     return (
         <div style={{ padding: "50px", maxWidth: "400px", margin: "0 auto", textAlign: "center" }}>
-            <h2>📝 자취생 커뮤니티 가입하기</h2>
+            <h2>커뮤니티 가입하기</h2>
             <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "20px" }}>
 
                 <input

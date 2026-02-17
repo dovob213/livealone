@@ -7,30 +7,22 @@ import PostDetail from './PostDetail'  // 상세 페이지 (댓글 기능 있는
 import PostCreate from './PostCreate'  // 글쓰기 페이지
 import Signup from './Signup';
 import PostEdit from './PostEdit';
-
+import Intro from './Intro';
+import Board from './Board';
 
 function Home() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [token, setToken] = useState(localStorage.getItem("token"))
-    const [posts, setPosts] = useState([])
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post("http://3.27.105.201:8080/api/users/login", { email, password });
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`, { email, password });
             localStorage.setItem("token", res.data);
             setToken(res.data);
         } catch (err) { alert("로그인 실패"); }
     }
-
-    useEffect(() => {
-        if (token) {
-            axios.get("http://3.27.105.201:8080/api/posts", {
-                headers: { Authorization: `Bearer ${token}` }
-            }).then(res => setPosts(res.data)).catch(() => setToken(null));
-        }
-    }, [token]);
 
     return (
         <div style={{ padding: "20px" }}>
@@ -43,30 +35,28 @@ function Home() {
                         <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} />
                         <button type="submit">로그인</button>
                     </form>
-                    {}
                     <Link to="/signup" style={{ color: "#007BFF", textDecoration: "underline", fontSize: "14px" }}>
                         아직 계정이 없으신가요? 회원가입하기
                     </Link>
                 </div>
             ) : (
-                <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom:"20px" }}>
-                        {/* 글쓰기 버튼 */}
-                        <Link to="/write">
-                            <button style={{ padding: "10px", background: "green", color: "white" }}>새 글 쓰기</button>
-                        </Link>
-                        <button onClick={() => { localStorage.removeItem("token"); setToken(null); }}>로그아웃</button>
-                    </div>
+                <div style={{ textAlign: "center", marginTop: "50px" }}>
+                    <h2>🎉 환영합니다! 사단법인 SDDG의 메인 화면입니다.</h2>
+                    <p style={{ color: "gray", marginBottom: "30px" }}>성공적으로 로그인되셨습니다.</p>
 
-                    <h2>글 목록</h2>
-                    {posts.map(post => (
-                        <div key={post.id} style={{ border: "1px solid #ddd", margin: "10px 0", padding: "15px" }}>
-                            <Link to={`/posts/${post.id}`}>
-                                <h3>{post.title}</h3>
-                            </Link>
-                            <p>{post.writer}</p>
-                        </div>
-                    ))}
+                    <div style={{ display: "flex", justifyContent: "center", gap: "15px" }}>
+                        {/* 게시판으로 가는 단축 버튼 */}
+                        <Link to="/board">
+                            <button style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer", background: "#007BFF", color: "white", border: "none", borderRadius: "5px" }}>
+                                📋 게시판 구경가기
+                            </button>
+                        </Link>
+                        <button
+                            onClick={() => { localStorage.removeItem("token"); setToken(null); }}
+                            style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer", background: "#ff4d4f", color: "white", border: "none", borderRadius: "5px" }}>
+                            로그아웃
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
@@ -75,16 +65,32 @@ function Home() {
 
 function App() {
     return (
-        <Routes>
-            <Route path="/" element={<Home />} />
+        <div>
+            <nav style={{
+                display: "flex",
+                gap: "20px",
+                padding: "15px",
+                backgroundColor: "#f8f9fa",
+                borderBottom: "1px solid #ddd",
+                fontWeight: "bold"
+            }}>
+                <Link to="/" style={{ textDecoration: "none", color: "black" }}>🏠 홈</Link>
+                <Link to="/intro" style={{ textDecoration: "none", color: "black" }}>👋 소개</Link>
+                <Link to="/board" style={{ textDecoration: "none", color: "black" }}>📋 게시판</Link>
+            </nav>
 
-            <Route path="/posts/:id" element={<PostDetail />} />
+            <Routes>
+                <Route path="/" element={<Home />} />
 
-            <Route path="/write" element={<PostCreate />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/edit/:id" element={<PostEdit />} />
+                <Route path="/intro" element={<Intro />} />
+                <Route path="/board" element={<Board />} />
 
-        </Routes>
+                <Route path="/posts/:id" element={<PostDetail />} />
+                <Route path="/write" element={<PostCreate />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/edit/:id" element={<PostEdit />} />
+            </Routes>
+        </div>
     )
 }
 

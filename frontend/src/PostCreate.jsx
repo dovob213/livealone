@@ -19,7 +19,7 @@ function PostCreate() {
             const token = localStorage.getItem("token"); // 토큰 꺼내기
 
             // 백엔드로 글쓰기 요청
-            await axios.post("http://3.27.105.201:8080/api/posts",
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/posts`,
                 {
                     title: title,
                     content: content

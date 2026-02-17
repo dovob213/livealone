@@ -3,8 +3,8 @@ spring:
     name: LiveAlone
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/LiveAlone
-    username: postgres
+    url: jdbc:postgresql://localhost:5433/livealone_db
+    username: user
     password: password
     driver-class-name: org.postgresql.Driver
 

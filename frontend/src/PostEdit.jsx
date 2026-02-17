@@ -11,7 +11,7 @@ function PostEdit() {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        axios.get(`http://3.27.105.201:8080/api/posts/${id}`, {
+        axios.get(`${import.meta.env.VITE_API_URL}/api/posts/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => {
@@ -35,7 +35,7 @@ function PostEdit() {
         try {
             const token = localStorage.getItem("token");
 
-            await axios.put(`http://3.27.105.201:8080/api/posts/${id}`,
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/posts/${id}`,
                 { title: title, content: content },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

@@ -15,7 +15,7 @@ function PostDetail() {
         const token = localStorage.getItem("token");
 
         // 게시글
-        axios.get(`http://3.27.105.201:8080/api/posts/${id}`, {
+        axios.get(`${import.meta.env.VITE_API_URL}/api/posts/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => setPost(res.data))
@@ -30,7 +30,7 @@ function PostDetail() {
 
     const fetchComments = () => {
         const token = localStorage.getItem("token");
-        axios.get(`http://3.27.105.201:8080/api/comments/${id}`, {
+        axios.get(`${import.meta.env.VITE_API_URL}/api/comments/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => setComments(res.data))
@@ -45,7 +45,7 @@ function PostDetail() {
 
         try {
             const token = localStorage.getItem("token");
-            await axios.post(`http://3.27.105.201:8080/api/comments/${id}`,
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/comments/${id}`,
                 { content: commentContent }, // 백엔드 DTO랑 이름(content) 맞춰야 함
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -63,7 +63,7 @@ function PostDetail() {
     const handleDelete = async () => {
         if (!window.confirm("정말 삭제하시겠습니까?")) return;
         try {
-            await axios.delete(`http://3.27.105.201:8080/api/posts/${id}`, {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/posts/${id}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             });
             alert("삭제되었습니다!");
