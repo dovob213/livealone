@@ -79,6 +79,30 @@ function App() {
                 <Link to="/board" style={{ textDecoration: "none", color: "black" }}>📋 게시판</Link>
             </nav>
 
+            <div
+                onClick={() => alert("현재 업무로 부재중입니다. 나중에 다시 시도해주세요.")}
+                style={{
+                    position: "fixed",
+                    bottom: "20px",
+                    right: "20px",
+                    backgroundColor: "rgba(0, 0, 0, 0.85)",
+                    color: "#00ff00",
+                    padding: "10px 15px",
+                    borderRadius: "50px",
+                    fontSize: "13px",
+                    fontWeight: "bold",
+                    fontFamily: "monospace",
+                    boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+                    cursor: "pointer",
+                    zIndex: 9999,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px"
+                }}>
+                <span style={{ fontSize: "10px" }}>🟢</span>
+                <span>[SYS] SDDG 은평 서버 (Ping: 12ms)</span>
+            </div>
+
             <Routes>
                 <Route path="/" element={<Home />} />
 
@@ -90,6 +114,13 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/edit/:id" element={<PostEdit />} />
             </Routes>
+
+            <footer style={{ marginTop: "50px", padding: "30px", backgroundColor: "#343a40", color: "#adb5bd", textAlign: "center", fontSize: "0.9rem", lineHeight: "1.5" }}>
+                <p style={{ margin: 0 }}><b>SDDG (Ssak da-DDaeng gyeo)</b> | 충남 부여지사, 유성지사(공사중), 광주지사, 은평지사</p>
+                <p style={{ margin: 0 }}>제1대 회장: 정찬영 | 이메일: chanyoungsoftware@gmail.com</p>
+                <p style={{ marginTop: "10px", color: "#6c757d" }}>© 2025 SDDG Corporation. All rights reserved. (Since 2025.12)</p>
+            </footer>
+
         </div>
     )
 }

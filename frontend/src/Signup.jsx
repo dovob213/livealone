@@ -56,7 +56,7 @@ function Signup() {
 
                 <input
                     type="text"
-                    placeholder="닉네임 (예: 자취왕)"
+                    placeholder="닉네임 (예: 미래전략본부실장)"
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
                     style={{ padding: "10px", fontSize: "16px", borderRadius: "5px", border: "1px solid #ccc" }}
