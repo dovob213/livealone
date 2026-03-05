@@ -18,6 +18,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        if (request.getMethod().equals("OPTIONS")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 요청 헤더에서 토큰 꺼내기.
         String token = resolveToken(request);
 
@@ -34,12 +40,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 스프링 시큐리티에게 로그인 됐다고 알려줌 (Context에 저장)
             SecurityContextHolder.getContext().setAuthentication(auth);
         } else{
-            System.out.println("3. 토큰이 없거나 유효하지 않음 (403 원인)");
+            System.out.println("3. 토큰이 없거나 유효하지 않음 (일단통과)");
         }
 
         // 다음 필터로 넘긴다. (계속 가세요~)
         filterChain.doFilter(request, response);
     }
+
 
     // 헤더에서 "Bearer "를 떼고 토큰만 추출하는 메서드
     private String resolveToken(HttpServletRequest request) {
@@ -49,4 +56,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
+
 }

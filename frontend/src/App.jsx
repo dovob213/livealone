@@ -1,128 +1,79 @@
-import { useState, useEffect } from 'react'
-import axios from 'axios'
-import { Routes, Route, useNavigate, Link } from 'react-router-dom'
-
-
-import PostDetail from './PostDetail'  // 상세 페이지 (댓글 기능 있는 파일)
-import PostCreate from './PostCreate'  // 글쓰기 페이지
-import Signup from './Signup';
-import PostEdit from './PostEdit';
-import Intro from './Intro';
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import Home from './pages/Home.jsx';
 import Board from './Board';
+import PostWrite from './PostWrite';
+import Login from './Login.jsx';
+import Join from './Join';
+import PostDetail from "./PostDetail.jsx";
 
-function Home() {
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [token, setToken] = useState(localStorage.getItem("token"))
+// import PostEdit from './PostEdit';
+// import NotFound from './NotFound';
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`, { email, password });
-            localStorage.setItem("token", res.data);
-            setToken(res.data);
-        } catch (err) { alert("로그인 실패"); }
-    }
+export default function App() {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        setIsLoggedIn(!!token); // 토큰이 있으면 true로 설정
+    }, []);
+
+    const handleLogout = () => {
+        if (window.confirm("로그아웃 하시겠습니까?")) {
+            localStorage.removeItem("accessToken");
+            setIsLoggedIn(false); // 상태 변경
+            alert("로그아웃 되었습니다.");
+            window.location.href = "/";
+        }
+    };
 
     return (
-        <div style={{ padding: "20px" }}>
-            <h1 style={{ textAlign: "center" }}> SDDG </h1>
-
-            {!token ? (
-                <div style={{ textAlign: "center" }}>
-                    <form onSubmit={handleLogin} style={{display:"flex", gap:"5px", justifyContent:"center", marginBottom: "10px"}}>
-                        <input placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} />
-                        <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} />
-                        <button type="submit">로그인</button>
-                    </form>
-                    <Link to="/signup" style={{ color: "#007BFF", textDecoration: "underline", fontSize: "14px" }}>
-                        아직 계정이 없으신가요? 회원가입하기
-                    </Link>
-                </div>
-            ) : (
-                <div style={{ textAlign: "center", marginTop: "50px" }}>
-                    <h2>🎉 환영합니다! 사단법인 SDDG의 메인 화면입니다.</h2>
-                    <p style={{ color: "gray", marginBottom: "30px" }}>성공적으로 로그인되셨습니다.</p>
-
-                    <div style={{ display: "flex", justifyContent: "center", gap: "15px" }}>
-                        {/* 게시판으로 가는 단축 버튼 */}
-                        <Link to="/board">
-                            <button style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer", background: "#007BFF", color: "white", border: "none", borderRadius: "5px" }}>
-                                📋 게시판 구경가기
+        <BrowserRouter>
+            {/* 상단 네비게이션 바 */}
+            <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "15px 40px", backgroundColor: "#ffffff", borderBottom: "1px solid #eee", position: "sticky", top: 0, zIndex: 100 }}>
+                <Link to="/" style={{ textDecoration: "none", color: "#ff9f43", fontSize: "1.5rem", fontWeight: "900" }}>
+                    자취생 커뮤니티
+                </Link>
+                <div style={{ display: "flex", gap: "20px", fontWeight: "bold" }}>
+                    <Link to="/" style={{ textDecoration: "none", color: "#333" }}>홈</Link>
+                    <Link to="/board" style={{ textDecoration: "none", color: "#333" }}>커뮤니티</Link>
+                    {isLoggedIn ? (
+                        <>
+                            <Link to="/write" style={{ color: "#333" }}>글쓰기</Link>
+                            <button onClick={handleLogout} style={{ background: "none", border: "none", color: "#333", cursor: "pointer", fontSize: "16px" }}>
+                                로그아웃
                             </button>
-                        </Link>
-                        <button
-                            onClick={() => { localStorage.removeItem("token"); setToken(null); }}
-                            style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer", background: "#ff4d4f", color: "white", border: "none", borderRadius: "5px" }}>
-                            로그아웃
-                        </button>
-                    </div>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/login" style={{ color: "#333" }}>로그인</Link>
+                            <Link to="/join" style={{ color: "#333" }}>회원가입</Link>
+                        </>
+                    )}
                 </div>
-            )}
-        </div>
-    )
-}
-
-function App() {
-    return (
-        <div>
-            <nav style={{
-                display: "flex",
-                gap: "20px",
-                padding: "15px",
-                backgroundColor: "#f8f9fa",
-                borderBottom: "1px solid #ddd",
-                fontWeight: "bold"
-            }}>
-                <Link to="/" style={{ textDecoration: "none", color: "black" }}>🏠 홈</Link>
-                <Link to="/intro" style={{ textDecoration: "none", color: "black" }}>👋 소개</Link>
-                <Link to="/board" style={{ textDecoration: "none", color: "black" }}>📋 게시판</Link>
             </nav>
 
-            <div
-                onClick={() => alert("현재 업무로 부재중입니다. 나중에 다시 시도해주세요.")}
-                style={{
-                    position: "fixed",
-                    bottom: "20px",
-                    right: "20px",
-                    backgroundColor: "rgba(0, 0, 0, 0.85)",
-                    color: "#00ff00",
-                    padding: "10px 15px",
-                    borderRadius: "50px",
-                    fontSize: "13px",
-                    fontWeight: "bold",
-                    fontFamily: "monospace",
-                    boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
-                    cursor: "pointer",
-                    zIndex: 9999,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px"
-                }}>
-                <span style={{ fontSize: "10px" }}>🟢</span>
-                <span>[SYS] SDDG 은평 서버 (Ping: 12ms)</span>
+            {/* 메인 화면 (페이지 전환 영역) */}
+            <div style={{ minHeight: "80vh", backgroundColor: "#fafafa" }}>
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    {<Route path="/board" element={<Board />} />}
+                    <Route path="/write" element={<PostWrite />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/join" element={<Join />} />
+                    <Route path="/post/:id" element={<PostDetail />} />
+                    {/* <Route path="/edit/:id" element={<PostEdit />} /> */}
+                    {/* <Route path="*" element={<NotFound />} /> */}
+                </Routes>
             </div>
 
-            <Routes>
-                <Route path="/" element={<Home />} />
 
-                <Route path="/intro" element={<Intro />} />
-                <Route path="/board" element={<Board />} />
-
-                <Route path="/posts/:id" element={<PostDetail />} />
-                <Route path="/write" element={<PostCreate />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/edit/:id" element={<PostEdit />} />
-            </Routes>
-
-            <footer style={{ marginTop: "50px", padding: "30px", backgroundColor: "#343a40", color: "#adb5bd", textAlign: "center", fontSize: "0.9rem", lineHeight: "1.5" }}>
-                <p style={{ margin: 0 }}><b>SDDG (Ssak da-DDaeng gyeo)</b> | 충남 부여지사, 유성지사(공사중), 광주지사, 은평지사</p>
-                <p style={{ margin: 0 }}>제1대 회장: 정찬영 | 이메일: chanyoungsoftware@gmail.com</p>
-                <p style={{ marginTop: "10px", color: "#6c757d" }}>© 2025 SDDG Corporation. All rights reserved. (Since 2025.12)</p>
+            {/* 하단 푸터 */}
+            <footer style={{ padding: "30px", backgroundColor: "#2d3436", color: "#b2bec3", textAlign: "center", fontSize: "0.85rem", lineHeight: "1.6" }}>
+                <p style={{ margin: 0 }}> 1인 가구 정보 공유 커뮤니티</p>
+                <p style={{ margin: 0 }}>깃허브: github.com/dovob213/LiveAlone</p>
+                <p style={{ marginTop: "10px", color: "#636e72" }}>© 2026 Community. All rights reserved.</p>
             </footer>
-
-        </div>
-    )
+        </BrowserRouter>
+    );
 }
-
-export default App

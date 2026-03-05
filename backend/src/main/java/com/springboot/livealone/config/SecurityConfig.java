@@ -36,12 +36,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                // (CORS 설정을 시큐리티에 등록) !!
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/join", "/api/users/login", "/api/users/signup").permitAll()
-                        // 2. 게시글 목록/상세 조회(GET) 누구나 보게
+                        .requestMatchers("/api/users/join", "/api/users/login", "/api/users/signup", "/error").permitAll()
+
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/posts/**").permitAll()
 
                         .anyRequest().authenticated()
@@ -51,7 +50,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // CORS 설정 구체적인 내용 (WebConfig 내용을 여기로)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

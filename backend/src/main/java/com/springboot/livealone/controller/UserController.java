@@ -5,7 +5,8 @@ import com.springboot.livealone.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.web.bind.annotation.*;import com.springboot.livealone.dto.request.LoginDto;
+import org.springframework.web.bind.annotation.*;
+import com.springboot.livealone.dto.request.LoginDto;
 
 @RestController
 @RequestMapping("/api/users") // 이 컨트롤러의 모든 주소는 /api/users로 시작
@@ -25,10 +26,14 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDto dto) {
+        System.out.println("이메일: [" + dto.getEmail() + "]");
+        System.out.println("비밀번호: [" + dto.getPassword() + "]");
+
         String token = userService.login(dto);
 
         // HTTP 헤더나 바디에 토큰 보내기
         return ResponseEntity.ok(token);
+
     }
 
     @GetMapping("/test")

@@ -1,53 +1,56 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react'; // useState, useEffect 추가!
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Board() {
+    const navigate = useNavigate();
+
     const [posts, setPosts] = useState([]);
-    const token = localStorage.getItem("token"); // 로그인 상태 확인용
 
     useEffect(() => {
-        if (token) {
-            axios.get(`${import.meta.env.VITE_API_URL}/api/posts`, {
-                headers: { Authorization: `Bearer ${token}` }
-            }).then(res => setPosts(res.data)).catch(() => console.log("불러오기 에러"));
-        }
-    }, [token]);
-
-    if (!token) {
-        return (
-            <div style={{ padding: "50px", textAlign: "center" }}>
-                <h2>🔒 로그인이 필요한 페이지입니다.</h2>
-                <Link to="/">
-                    <button style={{ padding: "10px", marginTop: "10px", cursor: "pointer" }}>홈으로 가서 로그인하기</button>
-                </Link>
-            </div>
-        );
-    }
+        fetch('http://localhost:8080/api/posts')
+            .then(response => response.json())
+            .then(data => {
+                setPosts(data);
+            })
+            .catch(error => {
+                console.error("데이터를 불러오는데 실패했습니다:", error);
+            });
+    }, []);
 
     return (
-        <div style={{ padding: "20px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom:"20px", borderBottom: "2px solid #eee", paddingBottom: "10px" }}>
-                <h2 style={{ margin: 0 }}>📋 자유 게시판</h2>
+        <div style={{ padding: "40px 20px", maxWidth: "1000px", margin: "0 auto", fontFamily: "sans-serif" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #333", paddingBottom: "15px", marginBottom: "20px" }}>
+                <h2 style={{ margin: 0, color: "#333" }}>자취생 커뮤니티</h2>
                 <Link to="/write">
-                    <button style={{ padding: "10px 15px", background: "green", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}>
-                        ✏️ 새 글 쓰기
+                    <button style={{ padding: "10px 20px", backgroundColor: "#ff9f43", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>
+                        글쓰기
                     </button>
                 </Link>
             </div>
 
-            {posts.length === 0 ? (
-                <p style={{ textAlign: "center", color: "gray" }}>등록된 게시글이 없습니다. 첫 글을 작성해 보세요!</p>
-            ) : (
-                posts.map(post => (
-                    <div key={post.id} style={{ border: "1px solid #ddd", margin: "10px 0", padding: "15px", borderRadius: "8px", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
-                        <Link to={`/posts/${post.id}`} style={{ textDecoration: "none", color: "black" }}>
-                            <h3 style={{ margin: "0 0 10px 0" }}>{post.title}</h3>
-                        </Link>
-                        <p style={{ margin: 0, color: "gray", fontSize: "14px" }}>작성자: {post.writer}</p>
-                    </div>
-                ))
-            )}
+            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
+                <thead>
+                <tr style={{ backgroundColor: "#f8f9fa", borderBottom: "1px solid #dee2e6" }}>
+                    <th style={{ padding: "15px", width: "10%" }}>번호</th>
+                    <th style={{ padding: "15px", width: "50%" }}>제목</th>
+                    <th style={{ padding: "15px", width: "15%" }}>작성자</th>
+                </tr>
+                </thead>
+                <tbody>
+                {posts.map((post) => (
+                    <tr key={post.id} style={{ borderBottom: "1px solid #dee2e6" }}>
+                        <td style={{ padding: "15px", color: "#666" }}>{post.id}</td>
+                        <td style={{ padding: "15px", textAlign: "left" }}>
+                            <Link to={`/post/${post.id}`} style={{ textDecoration: "none", color: "#2e86de", fontWeight: "500" }}>
+                                {post.title}
+                            </Link>
+                        </td>
+                        {/* DB 테이블(Entity)에 맞춰서 author나 content 등을 알맞게 적어주세요 */}
+                        <td style={{ padding: "15px", color: "#666" }}>익명</td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
         </div>
     );
 }
