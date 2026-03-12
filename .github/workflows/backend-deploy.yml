@@ -36,19 +36,34 @@ jobs:
           source: "backend/build/libs/*SNAPSHOT.jar"
           target: "/home/ubuntu/backend-dist"
 
-      - name: ‍스프링 부트 재시작 (SSH)
+      - name: 스프링 부트 재시작 (SSH)
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_KEY }}
           script: |
-            pid=$(pgrep -f backend-0.0.1-SNAPSHOT.jar) || true
-            if [ -n "$pid" ]; then
-              echo "기존 프로세스($pid) 종료 중..."
-              kill -9 $pid
+            # 1. 기존 실행 중인 프로세스 찾기
+            CURRENT_PID=$(pgrep -f "backend-0.0.1-SNAPSHOT.jar")
+            
+            # 2. 프로세스가 있으면 종료 (부드럽게 종료 후 안되면 강제종료)
+            if [ -z "$CURRENT_PID" ]; then
+              echo "실행 중인 스프링 부트 프로세스가 없습니다."
+            else
+              echo "기존 프로세스($CURRENT_PID) 종료 중..."
+              kill -15 $CURRENT_PID
+              sleep 5
+              # 여전히 살아있으면 강제 종료 (에러 무시 처리)
+              kill -9 $CURRENT_PID 2>/dev/null || true
             fi
             
+            # 3. 새로운 JAR 파일 이동
             cp /home/ubuntu/backend-dist/backend/build/libs/*SNAPSHOT.jar /home/ubuntu/
             
-            nohup java -jar /home/ubuntu/backend-0.0.1-SNAPSHOT.jar > nohup.out 2>&1 &
+            # 4. 백그라운드 실행 (로그를 nohup.out에 남김)
+            echo "새로운 버전 배포 시작..."
+            nohup java -jar /home/ubuntu/backend-0.0.1-SNAPSHOT.jar > /home/ubuntu/nohup.out 2>&1 &
+            
+            # 5. 잠시 대기 후 프로세스가 정상적으로 떴는지 확인
+            sleep 3
+            ps -ef | grep "backend-0.0.1-SNAPSHOT.jar" | grep -v grep
