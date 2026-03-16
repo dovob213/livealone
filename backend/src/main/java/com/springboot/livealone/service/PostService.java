@@ -78,10 +78,30 @@ public class PostService {
         if (!post.getUser().getEmail().equals(email)) {
             throw new IllegalArgumentException("본인 글만 수정할 수 있습니다."); // 여기서 걸리면 프론트로 에러가 감!
         }
-
         // 내용 변경. (JPA의 '더티 체킹' 덕분에 save()를 안 해도 알아서 DB가 바뀐다고 한다)
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponseDto> searchPosts(String type, String keyword) {
+
+        List<Post> posts;
+
+        if ("titleContent" .equals(type)) {
+            // 제목 + 내용 검색 (키워드를 두 파라미터에 똑같이 넣어줌)
+            posts = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword);
+        } else if ("writer" .equals(type)) {
+            // 작성자 검색
+            posts = postRepository.findByUserNicknameContainingIgnoreCase(keyword);
+        } else {
+            // 기본값: 제목 검색
+            posts = postRepository.findByTitleContainingIgnoreCase(keyword);
+        }
+
+        return posts.stream()
+                .map(PostResponseDto::new)
+                .collect(Collectors.toList());
     }
 
 }
