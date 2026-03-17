@@ -43,8 +43,8 @@ jobs:
             username: ${{ secrets.AWS_USERNAME }}
             key: ${{ secrets.AWS_KEY }}
             script: |
-              # 1. 기존 프로세스 찾기 (자폭 방지를 위해 [S]NAPSHOT 으로 검색!)
-              CURRENT_PID=$(pgrep -f "backend-0.0.1-[S]NAPSHOT.jar")
+              # 🌟 1. 긴 이름 대신, 정확히 'java'라는 이름으로 실행된 프로세스만 찾습니다! (자폭 원천 차단)
+              CURRENT_PID=$(pgrep -x java)
               
               # 2. 프로세스가 있으면 종료
               if [ -z "$CURRENT_PID" ]; then
@@ -63,8 +63,6 @@ jobs:
               echo "새로운 버전 배포 시작..."
               nohup java -jar /home/ubuntu/backend-0.0.1-SNAPSHOT.jar > /home/ubuntu/nohup.out 2>&1 &
               
-              # 5. 잠시 대기 후 프로세스가 정상적으로 떴는지 확인
+              # 5. 잠시 대기 후 프로세스가 정상적으로 떴는지 확인 (여기서도 java만 깔끔하게 검색)
               sleep 3
-              ps -ef | grep "backend-0.0.1-[S]NAPSHOT.jar"
-              
-              
+              pgrep -x java
