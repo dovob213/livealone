@@ -35,7 +35,8 @@ export default function Login() {
                     localStorage.setItem('accessToken', token);
                     console.log("로컬 스토리지 저장 완료!");
                     alert("로그인 성공! 🎉");
-                    navigate('/board');
+                    //navigate('/board');
+                    window.location.href = '/board';
                 }
             })
             .catch(error => {

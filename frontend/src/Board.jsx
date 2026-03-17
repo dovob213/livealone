@@ -98,9 +98,9 @@ export default function Board() {
             <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
                 <thead>
                 <tr style={{ backgroundColor: "#f8f9fa", borderBottom: "1px solid #dee2e6" }}>
-                    <th style={{ padding: "15px", width: "10%" }}>번호</th>
-                    <th style={{ padding: "15px", width: "50%" }}>제목</th>
-                    <th style={{ padding: "15px", width: "15%" }}>작성자</th>
+                    <th style={{ padding: "15px", width: "10%" , color: "#333"}}>번호</th>
+                    <th style={{ padding: "15px", width: "50%" , color: "#333"}}>제목</th>
+                    <th style={{ padding: "15px", width: "15%" , color: "#333"}}>작성자</th>
                 </tr>
                 </thead>
                 <tbody>
