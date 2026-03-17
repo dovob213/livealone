@@ -11,8 +11,9 @@ function PostDetail() {
     const [comments, setComments] = useState([]);
     const [commentContent, setCommentContent] = useState("");
 
-    // 🌟 API 기본 주소 (환경변수가 설정 안 되어 있을 경우를 대비해 직접 입력하거나 유지)
-    const API_BASE_URL = "http://localhost:8080";
+    // API 기본 주소 (환경변수가 설정 안 되어 있을 경우를 대비해 직접 입력하거나 유지)
+    //const API_BASE_URL = "http://localhost:8080";
+    const API_BASE_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         // 🌟 지갑 이름은 우리가 정한 'accessToken'입니다.

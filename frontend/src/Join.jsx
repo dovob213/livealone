@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Join() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
@@ -17,7 +19,7 @@ export default function Join() {
             role: "USER" // 백엔드 User 엔티티에 role이 필수라면 넣어주세요!
         };
 
-        fetch('http://localhost:8080/api/users/join', {
+        fetch(`{API_URL}/api/users/join`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(joinData)

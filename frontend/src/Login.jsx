@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Login() {
     const navigate = useNavigate();
 
@@ -11,7 +13,7 @@ export default function Login() {
     const handleLogin = (e) => {
         e.preventDefault();
 
-        fetch('http://localhost:8080/api/users/login', {
+        fetch(`${API_URL}/api/users/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: email, password: password })

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function PostWrite() {
     const navigate = useNavigate();
 
@@ -18,7 +20,7 @@ export default function PostWrite() {
             content: content
         };
 
-        fetch('http://localhost:8080/api/posts', {
+        fetch(`${API_URL}/api/posts`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

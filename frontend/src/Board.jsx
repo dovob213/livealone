@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Board() {
     const navigate = useNavigate();
 
@@ -11,7 +13,7 @@ export default function Board() {
 
     // 처음 화면 켜질 때 전체 게시글 불러오기
     useEffect(() => {
-        fetch('http://localhost:8080/api/posts')
+        fetch(`${API_URL}/api/posts`)
             .then(response => response.json())
             .then(data => setPosts(data))
             .catch(error => console.error("데이터를 불러오는데 실패했습니다:", error));
@@ -27,7 +29,7 @@ export default function Board() {
         // 검색 API는 토큰이 필요하므로 지갑에서 꺼내줍니다
         const token = localStorage.getItem('accessToken');
 
-        fetch(`http://localhost:8080/api/posts/search?type=${searchType}&keyword=${keyword}`, {
+        fetch(`${API_URL}/api/posts/search?type=${searchType}&keyword=${keyword}`, {
             method: 'GET',
             headers: {
                 'Authorization': token ? `Bearer ${token}` : ''
