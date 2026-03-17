@@ -1,12 +1,14 @@
 spring:
   application:
     name: LiveAlone
+  profiles:
+    active: local
 
-  datasource:
-    url: jdbc:postgresql://localhost:5433/livealone_db
-    username: user
-    password: password
-    driver-class-name: org.postgresql.Driver
+#  datasource:
+#    url: jdbc:postgresql://localhost:5433/livealone_db
+#    username: user
+#    password: password
+#    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
