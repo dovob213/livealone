@@ -23,3 +23,33 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
       - ./mongo_data:/data/db
+
+
+  # 🌟 1. 엘라스틱서치 (검색 엔진)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node # 서버 1대짜리 로컬용 모드
+      - xpack.security.enabled=false # 로컬 개발 편의를 위해 비밀번호 해제
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # 메모리 제한 (맥북 리소스 보호)
+    ports:
+      - "9200:9200" # 스프링 부트와 통신할 포트
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+  # 🌟 2. 키바나 (엘라스틱서치 시각화 & 테스트 도구)
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.2
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200 # 키바나가 ES를 바라보도록 연결
+    ports:
+      - "5601:5601" # 웹 브라우저 접속 포트
+    depends_on:
+      - elasticsearch # ES가 먼저 켜진 후 키바나가 켜지도록 설정
+
+  # 파일 맨 아래에 볼륨(데이터 영구 저장소) 설정 추가
+volumes:
+  esdata: # 엘라스틱서치 데이터 저장 공간
+

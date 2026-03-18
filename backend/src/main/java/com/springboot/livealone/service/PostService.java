@@ -9,6 +9,8 @@ import com.springboot.livealone.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.springboot.livealone.document.PostDocument;
+import com.springboot.livealone.repository.PostSearchRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +22,8 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
+    private final PostSearchRepository postSearchRepository;
+
     @Transactional
     public Long write(PostCreateDto dto, String email) {
         // 글 쓴 사람 찾기 (이메일)
@@ -29,10 +33,19 @@ public class PostService {
         // 게시글 엔티티 생성 (제목, 내용, 작성자User)
         Post post = new Post(dto.getTitle(), dto.getContent(), user);
 
-        // DB에 저장
-        postRepository.save(post);
+        // DB에 먼저 저장
+        Post savedPost = postRepository.save(post);
 
-        return post.getId(); // 저장된 글 번호 반환
+        // 엘라스틱서치
+        PostDocument postDocument = PostDocument.builder()
+                .id(savedPost.getId())
+                .title(savedPost.getTitle())
+                .content(savedPost.getContent())
+                .writer(user.getNickname())
+                .build();
+        postSearchRepository.save(postDocument);
+
+        return savedPost.getId();
     }
 
     @Transactional(readOnly = true) // 읽기 전용
@@ -45,29 +58,27 @@ public class PostService {
     // 게시글 조회 (상세보기)
     @Transactional(readOnly = true)
     public PostResponseDto getPost(Long id) {
-        // DB에서 id 조회
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
 
-        // 찾은 엔티티(Post)를 DTO로 반환
         return new PostResponseDto(post);
     }
-
 
     // 게시글 삭제
     @Transactional
     public void delete(Long id, String email) {
-        // 게시글 있는지 확인
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
 
         // 작성자 본인인지 확인
-        if (!post.getUser().getEmail().equals(email)) { // post.getUser().getEmail(): 글쓴이 이메일 vs email: 지금 로그인해서 삭제 버튼 누른 사람 이메일
+        if (!post.getUser().getEmail().equals(email)) {
             throw new IllegalArgumentException("작성자만 삭제할 수 있습니다!");
         }
 
-        // 3. 검증 통과했으면 삭제!
         postRepository.delete(post);
+
+        // 엘라스틱서치에서도 삭제
+        postSearchRepository.deleteById(id);
     }
 
     @Transactional
@@ -76,32 +87,55 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
         if (!post.getUser().getEmail().equals(email)) {
-            throw new IllegalArgumentException("본인 글만 수정할 수 있습니다."); // 여기서 걸리면 프론트로 에러가 감!
+            throw new IllegalArgumentException("본인 글만 수정할 수 있습니다.");
         }
-        // 내용 변경. (JPA의 '더티 체킹' 덕분에 save()를 안 해도 알아서 DB가 바뀐다고 한다)
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
+
+        PostDocument updatedDocument = PostDocument.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .writer(post.getUser().getNickname())
+                .build();
+        postSearchRepository.save(updatedDocument);
     }
+
+    // 아직 JPA
+//    @Transactional(readOnly = true)
+//    public List<PostResponseDto> searchPosts(String type, String keyword) {
+//
+//        List<Post> posts;
+//
+//        if ("titleContent".equals(type)) {
+//            posts = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword);
+//        } else if ("writer".equals(type)) {
+//            posts = postRepository.findByUserNicknameContainingIgnoreCase(keyword);
+//        } else {
+//            posts = postRepository.findByTitleContainingIgnoreCase(keyword);
+//        }
+//
+//        return posts.stream()
+//                .map(PostResponseDto::new)
+//                .collect(Collectors.toList());
+//    }
 
     @Transactional(readOnly = true)
     public List<PostResponseDto> searchPosts(String type, String keyword) {
 
-        List<Post> posts;
-
-        if ("titleContent" .equals(type)) {
-            // 제목 + 내용 검색 (키워드를 두 파라미터에 똑같이 넣어줌)
-            posts = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword);
-        } else if ("writer" .equals(type)) {
-            // 작성자 검색
-            posts = postRepository.findByUserNicknameContainingIgnoreCase(keyword);
+        List<PostDocument> searchResults;
+        if ("titleContent".equals(type)) {
+            searchResults = postSearchRepository.findByTitleOrContent(keyword, keyword);
+        } else if ("writer".equals(type)) {
+            searchResults = postSearchRepository.findByWriter(keyword);
         } else {
-            // 기본값: 제목 검색
-            posts = postRepository.findByTitleContainingIgnoreCase(keyword);
+            searchResults = postSearchRepository.findByTitle(keyword);
         }
 
-        return posts.stream()
+        return searchResults.stream()
                 .map(PostResponseDto::new)
                 .collect(Collectors.toList());
     }
+
 
 }

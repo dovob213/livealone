@@ -21,4 +21,15 @@ public class PostResponseDto {
         this.writer = post.getUser().getNickname(); // 유저 테이블에서 닉 꺼내오기
         this.createdDate = post.getCreatedDate();
     }
+
+    public PostResponseDto(com.springboot.livealone.document.PostDocument document) {
+        this.id = document.getId();
+        this.title = document.getTitle();
+
+        this.content = document.getContent();
+
+        this.writer = document.getWriter();
+
+    }
+
 }

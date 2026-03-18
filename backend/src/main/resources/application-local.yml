@@ -4,3 +4,6 @@ spring:
     username: user
     password: password
     driver-class-name: org.postgresql.Driver
+
+  elasticsearch:
+    uris: http://localhost:9200
