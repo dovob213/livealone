@@ -22,7 +22,7 @@ import java.util.Set;
 @Component
 public class JwtTokenProvider {
 
-    // application.yml에 설정한 값들을 가져옵니다.
+    // application.yml에 설정값 가져오기
     @Value("${jwt.secret}")
     private String salt;
 
@@ -35,14 +35,14 @@ public class JwtTokenProvider {
 
     @PostConstruct
     protected void init() {
-        // 비밀키를 암호화 알고리즘에 맞게 변환합니다.
+        // 비밀키 암호화
         this.secretKey = Keys.hmacShaKeyFor(salt.getBytes(StandardCharsets.UTF_8));
     }
 
-    // 1. Access Token 생성
+    // Access Token 생성
     public String createAccessToken(Long userId, String email, String role) {
         Claims claims = Jwts.claims().subject(email).build();
-        // 토큰에 담을 정보들 (Claims)
+        // 토큰에 담을 정보 (Claims)
         Date now = new Date();
 
         return Jwts.builder()
@@ -55,7 +55,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // 2. 토큰에서 유저 이메일 추출
+    // 토큰에서 이메일 추출
     public String getEmail(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
@@ -64,22 +64,18 @@ public class JwtTokenProvider {
                 .getPayload()
                 .getSubject();
     }
-
-    // 3. 토큰 유효성 검사
+    // 토큰 유효성 검사하기
     public boolean validateToken(String token) {
         try {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            // 토큰이 위조되었거나 만료되었을 때
+            // 토큰이 위조되었거나 만료되었을때
             return false;
         }
     }
 
-
-    // 추가할 메서드: 토큰에서 인증 정보 조회
     public Authentication getAuthentication(String token) {
-        // 토큰에서 이메일 끄집어내기
         Claims claims = Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
@@ -87,12 +83,12 @@ public class JwtTokenProvider {
                 .getPayload();
 
         String email = claims.getSubject();
-        String role = claims.get("role", String.class); // "USER" or "ADMIN"
+        String role = claims.get("role", String.class); // "USER" 혹은 "ADMIN"
 
-        // 스프링 시큐리티가 이해하는 "권한 객체" 만들기
+        // 스프링 시큐리티) "권한 객체" 만들기
         Set<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role));
 
-        // 스프링 시큐리티용 유저 객체 생성 (비밀번호는 몰라서 빈 문자열 넣음)
+        // 스프링 시큐리티용 유저 객체 생성
         UserDetails principal = new User(email, "", authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);

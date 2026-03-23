@@ -26,7 +26,6 @@ public class PostService {
 
     @Transactional
     public Long write(PostCreateDto dto, String email) {
-        // 글 쓴 사람 찾기 (이메일)
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
@@ -55,7 +54,7 @@ public class PostService {
                 .collect(Collectors.toList());   // 리스트로 반환
     }
 
-    // 게시글 조회 (상세보기)
+    // 상세보기
     @Transactional(readOnly = true)
     public PostResponseDto getPost(Long id) {
         Post post = postRepository.findById(id)
@@ -64,7 +63,7 @@ public class PostService {
         return new PostResponseDto(post);
     }
 
-    // 게시글 삭제
+
     @Transactional
     public void delete(Long id, String email) {
         Post post = postRepository.findById(id)
@@ -137,5 +136,23 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+
+    // 엘라스틱 서치 - 자동완성 로직
+    @Transactional(readOnly = true)
+    public List<String> getAutocompleteKeywords(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return List.of();   // '키워드' null -> null 리스트 반환하게
+        }
+
+        // 엘라스틱서치에서 (키워드로 시작)하는 문서 검색하기
+        List<PostDocument> documents = postSearchRepository.autocompleteTitle(keyword);
+
+        // 제목 추출 -> 중복을 제거 -> 5개 제한
+        return documents.stream()
+                .map(PostDocument::getTitle)
+                .distinct()
+                .limit(5)
+                .collect(Collectors.toList());
+    }
 
 }

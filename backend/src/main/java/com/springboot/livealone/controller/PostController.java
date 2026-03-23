@@ -60,5 +60,10 @@ public class PostController {
     }
 
 
+    @GetMapping("/autocomplete")    // 엘라스틱서치 - 자동완성 api 연결하기
+    public ResponseEntity<List<String>> autocomplete(@RequestParam String keyword) {
+        List<String> keywords = postService.getAutocompleteKeywords(keyword);
+        return ResponseEntity.ok(keywords);
+    }
 
 }

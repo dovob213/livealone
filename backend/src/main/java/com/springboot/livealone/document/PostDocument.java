@@ -14,7 +14,7 @@ public class PostDocument {
     @Id
     private Long id;
 
-    @Field(type = FieldType.Text) // 단어 쪼개서 검색하기 (형태소)
+    @Field(type = FieldType.Text) // 단어 쪼개서 검색 (형태소)
     private String title;
 
     @Field(type = FieldType.Text)

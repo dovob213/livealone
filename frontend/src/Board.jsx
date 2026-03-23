@@ -6,10 +6,38 @@ const API_URL = import.meta.env.VITE_API_URL;
 export default function Board() {
     const navigate = useNavigate();
 
-    // 🌟 상태 관리: 게시글 목록, 검색 조건, 검색어
+    // 🌟 상태 관리
     const [posts, setPosts] = useState([]);
-    const [searchType, setSearchType] = useState('title'); // 기본값: 제목 검색
-    const [keyword, setKeyword] = useState('');
+    const [searchType, setSearchType] = useState('title');
+    const [keyword, setKeyword] = useState(''); // 기존 keyword로 통일!
+
+    const [suggestions, setSuggestions] = useState([]); // 자동완성 결과 리스트
+    const [showSuggestions, setShowSuggestions] = useState(false); // 자동완성 창 표시 여부
+
+    // 🌟 검색어가 바뀔 때마다 실행되는 마법 (디바운스 적용)
+    useEffect(() => {
+        if (!keyword.trim()) {
+            setSuggestions([]);
+            setShowSuggestions(false);
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            try {
+                // axios 대신 기존에 쓰시던 fetch로 통일하고, API_URL을 적용했습니다!
+                const response = await fetch(`${API_URL}/api/posts/autocomplete?keyword=${keyword}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setSuggestions(data);
+                    setShowSuggestions(true);
+                }
+            } catch (error) {
+                console.error("자동완성 에러:", error);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [keyword]); // searchKeyword 대신 keyword 사용
 
     // 처음 화면 켜질 때 전체 게시글 불러오기
     useEffect(() => {
@@ -19,14 +47,13 @@ export default function Board() {
             .catch(error => console.error("데이터를 불러오는데 실패했습니다:", error));
     }, []);
 
-    // 🌟 검색 버튼을 눌렀을 때 실행되는 함수
+    // 검색 버튼을 눌렀을 때 실행되는 함수
     const handleSearch = () => {
         if (!keyword.trim()) {
             alert("검색어를 입력해주세요!");
             return;
         }
 
-        // 검색 API는 토큰이 필요하므로 지갑에서 꺼내줍니다
         const token = localStorage.getItem('accessToken');
 
         fetch(`${API_URL}/api/posts/search?type=${searchType}&keyword=${keyword}`, {
@@ -40,7 +67,8 @@ export default function Board() {
                 return response.json();
             })
             .then(data => {
-                setPosts(data); // 백엔드가 준 검색 결과로 게시글 목록을 갈아끼움!
+                setPosts(data);
+                setShowSuggestions(false); // 🌟 검색을 누르면 자동완성 창은 닫아줍니다!
             })
             .catch(error => {
                 console.error("검색 중 에러 발생:", error);
@@ -48,7 +76,6 @@ export default function Board() {
             });
     };
 
-    // 🌟 엔터키를 쳐도 검색되도록 하는 센스!
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
             handleSearch();
@@ -66,7 +93,7 @@ export default function Board() {
                 </Link>
             </div>
 
-            {/* 🌟 새로 추가된 검색창 UI 구역 */}
+            {/* 🌟 중복을 제거하고 하나로 합친 깔끔한 검색창 구역 */}
             <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "30px" }}>
                 <select
                     value={searchType}
@@ -78,14 +105,58 @@ export default function Board() {
                     <option value="writer">작성자</option>
                 </select>
 
-                <input
-                    type="text"
-                    placeholder="검색어를 입력하세요"
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    style={{ width: "300px", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-                />
+                <div style={{ position: "relative", display: "inline-block" }}>
+                    <input
+                        type="text"
+                        placeholder="검색어를 입력하세요"
+                        value={keyword}
+                        onChange={(e) => setKeyword(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        onFocus={() => {
+                            if (suggestions.length > 0) setShowSuggestions(true);
+                        }}
+                        style={{ width: "300px", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
+                    />
+
+                    {/* 🌟 자동완성 드롭다운 창 */}
+                    {showSuggestions && suggestions.length > 0 && (
+                        <ul style={{
+                            position: "absolute",
+                            top: "100%", // input 바로 아래
+                            left: "0",
+                            width: "320px", // input 창 너비(300px + padding)와 맞춤
+                            backgroundColor: "white",
+                            border: "1px solid #ccc",
+                            listStyle: "none",
+                            padding: "0",
+                            margin: "0",
+                            zIndex: 1000,
+                            boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                            borderRadius: "0 0 5px 5px"
+                        }}>
+                            {suggestions.map((item, index) => (
+                                <li
+                                    key={index}
+                                    style={{
+                                        padding: "10px",
+                                        borderBottom: index === suggestions.length - 1 ? "none" : "1px solid #eee", // 마지막 줄은 선 제거
+                                        cursor: "pointer",
+                                        fontSize: "14px",
+                                        textAlign: "left"
+                                    }}
+                                    onMouseDown={() => {
+                                        setKeyword(item);
+                                        setShowSuggestions(false);
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
+                                    onMouseLeave={(e) => e.target.style.backgroundColor = "white"}
+                                >
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
 
                 <button
                     onClick={handleSearch}
@@ -95,6 +166,7 @@ export default function Board() {
                 </button>
             </div>
 
+            {/* 🌟 게시글 목록 테이블 */}
             <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
                 <thead>
                 <tr style={{ backgroundColor: "#f8f9fa", borderBottom: "1px solid #dee2e6" }}>
@@ -112,7 +184,6 @@ export default function Board() {
                                 {post.title}
                             </Link>
                         </td>
-                        {/* 백엔드 필드명에 맞춰서 post.nickname 또는 post.writer로 수정 필요 */}
                         <td style={{ padding: "15px", color: "#666" }}>{post.nickname || post.writer || "익명"}</td>
                     </tr>
                 ))}
